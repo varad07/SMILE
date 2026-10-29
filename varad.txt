@@ -1,0 +1,56 @@
+package in.ecgc.erp.policy_exporter_emp_be.aspect;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author Vaibhav Rane
+ * Logs how long each call to a downstream service (Feign proxy) takes,
+ * including when it fails, so that slow/failed calls to Keycloak-dependent
+ * downstream services are visible with their exact elapsed time.
+ */
+@Aspect
+@Component
+public class LoggingDurationAspect {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingDurationAspect.class);
+
+    // Pointcut for Feign proxy (downstream service call) methods
+    @Pointcut("execution(* in.ecgc.erp.policy_exporter_emp_be.proxy.*.*(..))")
+    private void allProxy() {
+        /*
+         * This method is not supposed to perform any operation. This is meant to be a blank and acts like a Pointcut.
+         * Throwing this exception in order to prevent it from accidentally executing*/
+        throw new UnsupportedOperationException();
+    }
+
+    // Around advice for Proxy (downstream service call) methods
+    @Around("allProxy()")
+    public Object logAroundProxy(ProceedingJoinPoint joinPoint) throws Throwable {
+        return logExecutionTime(joinPoint, "BE Proxy");
+    }
+
+    // Measures and logs execution time for both successful and failed calls
+    private Object logExecutionTime(ProceedingJoinPoint joinPoint, String layer) throws Throwable {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object result = joinPoint.proceed();
+            long durationMs = System.currentTimeMillis() - startTime;
+            logger.info("Logger Result From BE : Executing: {}.{}() with params: {} in layer: {} took {} ms",
+                    joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName(),
+                    joinPoint.getArgs(), layer, durationMs);
+            return result;
+        } catch (Throwable ex) {
+            long durationMs = System.currentTimeMillis() - startTime;
+            logger.warn("Logger Result From BE : Executing: {}.{}() with params: {} in layer: {} FAILED after {} ms with exception: {}: {}",
+                    joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName(),
+                    joinPoint.getArgs(), layer, durationMs, ex.getClass().getName(), ex.getMessage());
+            throw ex;
+        }
+    }
+}
