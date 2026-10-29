@@ -54,3 +54,106 @@ public class LoggingDurationAspect {
         }
     }
 }
+
+
+
+
+
+
+
+package in.ecgc.erp.policy_exporter_emp_be.aspect;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingDurationAspect {
+
+    @Autowired
+    private Environment env;
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingDurationAspect.class);
+
+    // Pointcut for Controller methods
+    @Pointcut("execution(* in.ecgc.erp.policy_exporter_emp_be.controller.*.*(..))")
+    private void allController() { 
+    	/*
+		 * This method is not supposed to perform any operation. This is meant to be a blank and acts like a Pointcut.
+		 * Throwing this exception in order to prevent it from accidentally executing*/
+		throw new UnsupportedOperationException();
+    }
+
+    // Pointcut for Service methods
+    @Pointcut("execution(* in.ecgc.erp.policy_exporter_emp_be.service.*.*(..))")
+    private void allService() {
+    	/*
+		 * This method is not supposed to perform any operation. This is meant to be a blank and acts like a Pointcut.
+		 * Throwing this exception in order to prevent it from accidentally executing*/
+		throw new UnsupportedOperationException();
+    }
+
+    // Pointcut for DAO methods
+    @Pointcut("execution(* in.ecgc.erp.policy_exporter_emp_be.dao.*.*(..))")
+    private void allDao() {
+    	/*
+		 * This method is not supposed to perform any operation. This is meant to be a blank and acts like a Pointcut.
+		 * Throwing this exception in order to prevent it from accidentally executing*/
+		throw new UnsupportedOperationException();
+    }
+    
+    // Pointcut for Proxy methods
+    @Pointcut("execution(* in.ecgc.erp.policy_exporter_emp_be.proxy.*.*(..))")
+    private void allProxy() {
+    	/*
+		 * This method is not supposed to perform any operation. This is meant to be a blank and acts like a Pointcut.
+		 * Throwing this exception in order to prevent it from accidentally executing*/
+		throw new UnsupportedOperationException();
+    }
+
+    // Around advice for Controller methods
+    @Around("allController()")
+    public Object logAroundController(ProceedingJoinPoint joinPoint) throws Throwable {
+        return logExecutionTime(joinPoint, "Controller");
+    }
+
+    // Around advice for Service methods
+    @Around("allService()")
+    public Object logAroundService(ProceedingJoinPoint joinPoint) throws Throwable {
+        return logExecutionTime(joinPoint, "Service");
+    }
+
+    // Around advice for DAO methods
+    @Around("allDao()")
+    public Object logAroundDao(ProceedingJoinPoint joinPoint) throws Throwable {
+        return logExecutionTime(joinPoint, "DAO");
+    }
+    
+    // Around advice for Proxy methods
+    @Around("allProxy()")
+    public Object logAroundProxy(ProceedingJoinPoint joinPoint) throws Throwable {
+        return logExecutionTime(joinPoint, "BE Proxy");
+    }
+
+    // Method to log execution time
+    private Object logExecutionTime(ProceedingJoinPoint joinPoint, String layer) throws Throwable {
+        long startTime = System.currentTimeMillis();
+        Object result = joinPoint.proceed();
+        long duration = System.currentTimeMillis() - startTime;
+
+        String methodName = joinPoint.getSignature().getName();
+        String className = joinPoint.getSignature().getDeclaringTypeName();
+        Object[] signatureArgs = joinPoint.getArgs();
+
+        logger.info("Logger Result From BE : Executing: {}.{}() with params: {} in layer: {} took {} ms", className, methodName, signatureArgs, layer, duration);
+        return result;
+    }
+}
+
