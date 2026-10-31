@@ -1,9 +1,9 @@
-package in.ecgc.smile.erp.reporting.jasper.be.service.hrd;
+package in.ecgc.smile.erp.reporting.jasper.fe.service.hrd;
 
 import java.util.List;
 
-import in.ecgc.smile.erp.reporting.jasper.be.model.hrd.HrdLookupOption;
-import in.ecgc.smile.erp.reporting.jasper.be.model.hrd.HrdR05;
+import in.ecgc.smile.erp.reporting.jasper.fe.model.hrd.HrdLookupOption;
+import in.ecgc.smile.erp.reporting.jasper.fe.model.hrd.HrdR05;
 
 public interface HrdService {
 

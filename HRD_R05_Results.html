@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+	layout:decorate="~{layout/layout}" lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Reporting - HRD_R05 Employee Report</title>
+</head>
+
+<body>
+	<div id="page-wrapper" layout:fragment="content">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/reporting/">Reporting Dashboard</a></li>
+				<li class="breadcrumb-item"><a th:href="@{/hrd-reports/HRD_R05}">HRD_R05 - Employee Report</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Results</li>
+			</ol>
+		</nav>
+
+		<div class="alert alert-danger dngr" role="alert" th:if="${FailureMessage != null}" th:text="${FailureMessage}">
+		</div>
+
+		<div class="card shadow mb-4 mt-2">
+			<div class="card-body">
+
+				<div class="text-right mb-3">
+					<form id="pdfDownloadForm" th:action="@{/hrd-reports/HRD_R05/pdf}" method="POST"
+						style="display:inline">
+						<input type="hidden" name="empNo" th:value="${empNo}">
+						<input type="hidden" name="desigCd" th:value="${desigCd}">
+						<input type="hidden" name="officeId" th:value="${officeId}">
+						<input type="hidden" name="fromDate" th:value="${fromDate}">
+						<input type="hidden" name="toDate" th:value="${toDate}">
+						<input type="submit" class="btn custom-smile-btn-submit" value="Download PDF">
+					</form>
+					<button type="button" class="btn custom-smile-btn-back ml-1" onclick="history.go(-1)">Back</button>
+				</div>
+
+				<div th:each="emp : ${report}" class="card mb-3">
+					<div class="card-body">
+						<h5 th:text="${emp.empName} + ' (Emp No: ' + ${emp.empNo} + ')'"></h5>
+
+						<table class="table table-bordered table-sm">
+							<tbody>
+								<tr>
+									<th>Date of Joining</th>
+									<td th:text="${emp.doj != null} ? ${#dates.format(emp.doj, 'dd/MM/yyyy')} : ''"></td>
+									<th>Category</th>
+									<td th:text="${emp.category}"></td>
+								</tr>
+								<tr>
+									<th>Office ID</th>
+									<td th:text="${emp.officeId}"></td>
+									<th>Cadre/Rank</th>
+									<td th:text="${emp.cadreRank}"></td>
+								</tr>
+								<tr>
+									<th>Designation</th>
+									<td th:text="${emp.designation}"></td>
+									<th>Date of Birth</th>
+									<td th:text="${emp.dob != null} ? ${#dates.format(emp.dob, 'dd/MM/yyyy')} : ''"></td>
+								</tr>
+								<tr>
+									<th>Retirement Date</th>
+									<td th:text="${emp.retirementDate != null} ? ${#dates.format(emp.retirementDate, 'dd/MM/yyyy')} : ''"></td>
+									<th>Last Promotion Date</th>
+									<td th:text="${emp.lastPromotionDate != null} ? ${#dates.format(emp.lastPromotionDate, 'dd/MM/yyyy')} : ''"></td>
+								</tr>
+								<tr>
+									<th>Total Completed Service</th>
+									<td colspan="3" th:text="${emp.totalCompletedService}"></td>
+								</tr>
+							</tbody>
+						</table>
+
+						<h6>Qualifications</h6>
+						<table class="table table-bordered table-sm" th:if="${emp.qualifications != null and !emp.qualifications.isEmpty()}">
+							<thead>
+								<tr>
+									<th>Degree</th>
+									<th>Board/University</th>
+									<th>Year of Passing</th>
+									<th>Percentage</th>
+									<th>Specialization</th>
+									<th>Education Medium</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="q : ${emp.qualifications}">
+									<td th:text="${q.degreeName}"></td>
+									<td th:text="${q.boardUniv}"></td>
+									<td th:text="${q.yearOfPassing}"></td>
+									<td th:text="${q.percentage}"></td>
+									<td th:text="${q.specialization}"></td>
+									<td th:text="${q.educationMedium}"></td>
+								</tr>
+							</tbody>
+						</table>
+						<p th:if="${emp.qualifications == null or emp.qualifications.isEmpty()}">No qualifications on record.</p>
+
+						<h6>Locations Served</h6>
+						<table class="table table-bordered table-sm" th:if="${emp.locationsServed != null and !emp.locationsServed.isEmpty()}">
+							<thead>
+								<tr>
+									<th>Place</th>
+									<th>From</th>
+									<th>To</th>
+									<th>Capacity Worked</th>
+									<th>Dept/Office</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="loc : ${emp.locationsServed}">
+									<td th:text="${loc.place}"></td>
+									<td th:text="${loc.fromDate != null} ? ${#dates.format(loc.fromDate, 'dd/MM/yyyy')} : ''"></td>
+									<td th:text="${loc.toDate != null} ? ${#dates.format(loc.toDate, 'dd/MM/yyyy')} : 'Present'"></td>
+									<td th:text="${loc.capacityWorked}"></td>
+									<td th:text="${loc.deptOffice}"></td>
+								</tr>
+							</tbody>
+						</table>
+						<p th:if="${emp.locationsServed == null or emp.locationsServed.isEmpty()}">No transfer/posting history on record.</p>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
